@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DANA Kaget</title>
+<style>
+  :root{
+    --sky-top:#1a8fff;
+    --sky-mid:#0a6fe0;
+    --sky-deep:#063f9c;
+    --gold:#ffd76a;
+    --gold-deep:#e8a93a;
+    --pink-bill:#f3a6c4;
+    --card-glow:#bfe0ff;
+    --paper:#ffffff;
+    --ink:#0b2a55;
+    --ink-soft:#3a5a8c;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;
+    height:100%;
+    font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,sans-serif;
+    background:#000;
+    overflow:hidden;
+  }
+  .phone{
+    position:relative;
+    max-width:430px;
+    height:100vh;
+    margin:0 auto;
+    background:
+      radial-gradient(ellipse at 20% 0%, var(--sky-top) 0%, transparent 55%),
+      linear-gradient(180deg, var(--sky-mid) 0%, var(--sky-deep) 100%);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* status bar mock */
+  .statusbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 18px 4px;
+    color:#fff;
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:.3px;
+    opacity:.85;
+    flex-shrink:0;
+  }
+  .statusbar .dots{display:flex;gap:6px;align-items:center;}
+  .statusbar svg{display:block;}
+
+  .topbar{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:14px 18px 6px;
+    flex-shrink:0;
+  }
+  .close-btn{
+    width:30px;height:30px;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;
+    font-size:22px;
+    cursor:pointer;
+    background:none;
+    border:none;
+    line-height:1;
+    opacity:.9;
+  }
+  .topbar h1{
+    color:#fff;
+    font-size:19px;
+    font-weight:700;
+    margin:0;
+    letter-spacing:.2px;
+  }
+
+  .stage{
+    position:relative;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    padding-top:18px;
+    overflow:hidden;
+  }
+
+  .prompt{
+    color:#fff;
+    text-align:center;
+    font-size:16.5px;
+    font-weight:600;
+    line-height:1.45;
+    text-shadow:0 1px 6px rgba(0,40,90,.3);
+    margin-bottom:22px;
+    padding:0 30px;
+    transition:opacity .25s ease;
+  }
+
+  /* floating decor */
+  .decor{position:absolute; pointer-events:none; opacity:.92; filter:drop-shadow(0 6px 10px rgba(0,20,60,.25));}
+  .decor.moon{top:10%; right:6%; width:46px; animation:float-slow 6s ease-in-out infinite;}
+  .decor.bill1{top:18%; left:-6%; width:96px; transform:rotate(-18deg); animation:float-slow 5.5s ease-in-out infinite;}
+  .decor.bill2{bottom:24%; right:-8%; width:110px; transform:rotate(14deg); animation:float-slow 7s ease-in-out infinite .4s;}
+  .decor.coin1{top:30%; right:2%; width:64px; animation:spin-float 8s linear infinite;}
+  .decor.coin2{bottom:16%; left:0%; width:70px; animation:spin-float 9s linear infinite reverse;}
+  .decor.sparkle{position:absolute; color:#fff; opacity:.8;}
+  @keyframes float-slow{
+    0%,100%{transform:translateY(0) rotate(var(--r,0deg));}
+    50%{transform:translateY(-14px) rotate(var(--r,0deg));}
+  }
+  @keyframes spin-float{
+    0%{transform:translateY(0) rotate(0deg);}
+    50%{transform:translateY(-10px) rotate(180deg);}
+    100%{transform:translateY(0) rotate(360deg);}
+  }
+
+  /* envelope card */
+  .envelope-wrap{
+    position:relative;
+    width:78%;
+    max-width:300px;
+    aspect-ratio:300/430;
+    cursor:pointer;
+    z-index:5;
+    transition:transform .15s ease;
+  }
+  .envelope-wrap:active{transform:scale(.97);}
+  .envelope-card{
+    width:100%;
+    height:100%;
+    border-radius:18px;
+    background:linear-gradient(180deg, #5fb0ff 0%, #2f7fe8 55%, #1c5fc4 100%);
+    box-shadow:0 18px 40px rgba(5,30,70,.45), inset 0 0 0 1px rgba(255,255,255,.15);
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .envelope-flap{
+    position:absolute;
+    top:0; left:0; right:0;
+    height:46%;
+    background:linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,0) 60%);
+    clip-path:polygon(0 0,100% 0,50% 100%);
+  }
+  .badge{
+    margin-top:17%;
+    width:80px;height:80px;
+    border-radius:50%;
+    background:#fff;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 22px rgba(0,30,80,.35);
+    position:relative;
+    z-index:2;
+  }
+  .badge::before{
+    content:"";
+    position:absolute;
+    inset:-7px;
+    border-radius:50%;
+    background:repeating-conic-gradient(#1c5fc4 0deg 10deg, transparent 10deg 20deg);
+    z-index:-1;
+  }
+  .badge-icon{
+    width:36px;height:36px;
+    color:#1c5fc4;
+  }
+  .event-title{
+    margin-top:18px;
+    color:#fff;
+    font-weight:800;
+    font-size:26px;
+    line-height:1.05;
+    text-align:center;
+    letter-spacing:.5px;
+    text-shadow:0 3px 0 rgba(10,40,100,.35);
+    padding:0 14px;
+  }
+  .event-title small{
+    display:block;
+    font-size:13.5px;
+    font-weight:600;
+    letter-spacing:1.5px;
+    color:#bfe0ff;
+    margin-bottom:4px;
+    text-shadow:none;
+  }
+  .event-sub{
+    margin-top:auto;
+    width:100%;
+    padding:14px 16px 18px;
+    background:linear-gradient(180deg, rgba(10,40,100,0) 0%, rgba(8,30,80,.55) 100%);
+    color:#fff;
+    text-align:center;
+    font-size:13.5px;
+    font-weight:600;
+    line-height:1.4;
+  }
+
+  .tap-hint{
+    position:absolute;
+    bottom:8%;
+    left:50%;
+    transform:translateX(-50%);
+    color:#fff;
+    font-size:12.5px;
+    font-weight:600;
+    opacity:.85;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    animation:pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:.5;}50%{opacity:.95;}}
+
+  /* pedestal */
+  .pedestal-wrap{
+    position:relative;
+    width:100%;
+    display:flex;
+    justify-content:center;
+    margin-top:auto;
+    flex-shrink:0;
+  }
+  .pedestal{
+    width:120%;
+    max-width:520px;
+  }
+  .sender-pill{
+    position:absolute;
+    left:50%;
+    top:62%;
+    transform:translate(-50%,-50%);
+    background:#fff;
+    border-radius:40px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px 20px 8px 8px;
+    box-shadow:0 10px 24px rgba(0,20,60,.25);
+    min-width:220px;
+  }
+  .sender-avatar{
+    width:38px;height:38px;
+    border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, #2a2a2a, #000 70%);
+    flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--gold);
+    font-size:16px;
+  }
+  .sender-text{display:flex; flex-direction:column; line-height:1.25;}
+  .sender-text .label{font-size:11.5px; color:var(--ink-soft); font-weight:600;}
+  .sender-text .name{font-size:16px; color:var(--ink); font-weight:700;}
+
+  /* ===== Modal reveal ===== */
+  .overlay{
+    position:absolute;
+    inset:0;
+    background:rgba(5,20,50,.35);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .3s ease;
+    z-index:50;
+    padding:24px;
+  }
+  .overlay.show{opacity:1; pointer-events:auto;}
+  .modal{
+    width:100%;
+    max-width:340px;
+    background:#fff;
+    border-radius:22px;
+    padding:34px 26px 26px;
+    text-align:center;
+    box-shadow:0 30px 60px rgba(0,20,60,.4);
+    transform:translateY(40px) scale(.92);
+    opacity:0;
+    transition:transform .45s cubic-bezier(.2,.9,.25,1.2), opacity .35s ease;
+  }
+  .overlay.show .modal{transform:translateY(0) scale(1); opacity:1;}
+  .modal .lead{
+    font-size:15.5px;
+    color:var(--ink-soft);
+    font-weight:600;
+    margin:0 0 4px;
+  }
+  .modal .amount{
+    font-size:46px;
+    font-weight:800;
+    color:var(--ink);
+    margin:2px 0 16px;
+    letter-spacing:.5px;
+  }
+  .modal .amount span{color:#0a6fe0;}
+  .modal .desc{
+    font-size:14px;
+    color:var(--ink-soft);
+    line-height:1.5;
+    margin:0 0 22px;
+  }
+  .modal .desc b{color:var(--ink);}
+  .modal-btn{
+    width:100%;
+    padding:13px;
+    border-radius:30px;
+    border:1.5px solid #0a6fe0;
+    background:#fff;
+    color:#0a6fe0;
+    font-size:14.5px;
+    font-weight:700;
+    letter-spacing:.4px;
+    cursor:pointer;
+    transition:background .2s, color .2s;
+  }
+  .modal-btn:active{background:#0a6fe0; color:#fff;}
+  .modal-note{
+    margin-top:14px;
+    font-size:11px;
+    color:#9aa9c0;
+    font-weight:600;
+  }
+
+  /* confetti */
+  .confetti{
+    position:absolute;
+    top:-10px;
+    border-radius:2px;
+    opacity:0;
+  }
+
+  .demo-tag{
+    position:absolute;
+    top:8px;
+    left:50%;
+    transform:translateX(-50%);
+    background:rgba(0,0,0,.35);
+    color:#fff;
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:1px;
+    padding:3px 10px;
+    border-radius:20px;
+    z-index:60;
+    text-transform:uppercase;
+  }
+</style>
+</head>
+<body>
+
+<div class="phone" id="phone">
+  <div class="demo-tag">Demo · bukan aplikasi resmi</div>
+
+  <div class="statusbar">
+    <span>07.17</span>
+    <div class="dots">
+      <svg width="16" height="11" viewBox="0 0 16 11" fill="white"><path d="M1 9h2v2H1zM4 6h2v5H4zM7 4h2v7H7zM10 2h2v9h-2zM13 0h2v11h-2z"/></svg>
+      <span style="font-size:11px">97%</span>
+    </div>
+  </div>
+
+  <div class="topbar">
+    <button class="close-btn" aria-label="Tutup">&times;</button>
+    <h1>DANA Kaget</h1>
+  </div>
+
+  <div class="stage">
+    <div class="prompt" id="prompt">Tap amplop buat<br>liat DANA Kaget</div>
+
+    <!-- decor -->
+    <svg class="decor moon" viewBox="0 0 24 24" fill="#ffe9a8"><path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+    <svg class="decor bill1" viewBox="0 0 100 50"><rect width="100" height="50" rx="4" fill="#f4b6cf"/><circle cx="50" cy="25" r="14" fill="#fff" opacity=".5"/></svg>
+    <svg class="decor bill2" viewBox="0 0 100 50"><rect width="100" height="50" rx="4" fill="#f4b6cf"/><circle cx="50" cy="25" r="14" fill="#fff" opacity=".5"/></svg>
+    <svg class="decor coin1" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="var(--gold)" stroke="var(--gold-deep)" stroke-width="3"/><circle cx="30" cy="30" r="11" fill="none" stroke="var(--gold-deep)" stroke-width="3"/></svg>
+    <svg class="decor coin2" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="var(--gold)" stroke="var(--gold-deep)" stroke-width="3"/><circle cx="30" cy="30" r="11" fill="none" stroke="var(--gold-deep)" stroke-width="3"/></svg>
+
+    <div class="envelope-wrap" id="envelope">
+      <div class="envelope-card">
+        <div class="envelope-flap"></div>
+        <div class="badge">
+          <svg class="badge-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M3 6l6 4 3-2 3 2 6-4v3l-6 4-3-2-3 2-6-4V6zm0 6l6 4 3-2 3 2 6-4v3l-6 4-3-2-3 2-6-4v-3z"/></svg>
+        </div>
+        <div class="event-title">
+          <small>FESTIVAL</small>
+          BOLA DUNIA
+        </div>
+        <div class="event-sub">Dukung negara favorit kamu di Piala Dunia 2026</div>
+      </div>
+      <div class="tap-hint">👆 Tap untuk membuka</div>
+    </div>
+  </div>
+
+  <div class="pedestal-wrap">
+    <svg class="pedestal" viewBox="0 0 430 170" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="podTop" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#ffe9b0"/>
+          <stop offset="1" stop-color="#e8a93a"/>
+        </linearGradient>
+        <linearGradient id="podBody" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#1c6fe0"/>
+          <stop offset="1" stop-color="#0a3f9c"/>
+        </linearGradient>
+      </defs>
+      <polygon points="60,30 370,30 430,55 0,55" fill="url(#podTop)"/>
+      <rect x="0" y="55" width="430" height="115" fill="url(#podBody)"/>
+      <ellipse cx="215" cy="30" rx="155" ry="16" fill="#fff4d6"/>
+    </svg>
+    <div class="sender-pill">
+      <div class="sender-avatar">★</div>
+      <div class="sender-text">
+        <span class="label">Dari</span>
+        <span class="name" id="senderName">Alvino</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- reveal modal -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <p class="lead" id="modalLead">Yay! Kamu dapet</p>
+      <div class="amount"><span id="amountValue">Rp25.000</span></div>
+      <p class="desc" id="modalDesc">Selamat, kamu mendapatkan DANA Kaget dari <b id="senderInModal">Alvino</b> 🎉</p>
+      <button class="modal-btn" id="closeModalBtn">TUTUP</button>
+      <p class="modal-note">Halaman demo — tidak terhubung ke saldo atau rekening apapun.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+//  LOGIKA LOKASI + TAMPILAN MODAL
+// ============================================================
+
+const envelope = document.getElementById('envelope');
+const overlay = document.getElementById('overlay');
+const amountValue = document.getElementById('amountValue');
+const closeBtn = document.getElementById('closeModalBtn');
+const phone = document.getElementById('phone');
+const prompt = document.getElementById('prompt');
+const modalLead = document.getElementById('modalLead');
+const modalDesc = document.getElementById('modalDesc');
+const senderInModal = document.getElementById('senderInModal');
+
+let isProcessing = false; // cegah spam klik
+
+// ===== Helper: format Rupiah =====
+function formatRupiah(n){
+  return 'Rp' + n.toLocaleString('id-ID');
+}
+
+// ===== Acak nominal =====
+function randomAmount(){
+  const pool = [100, 500, 1000, 2500, 5000, 10000, 25000, 50000];
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+// ===== Confetti =====
+function launchConfetti(){
+  const colors = ['#ffd76a','#1a8fff','#f3a6c4','#ffffff','#0a6fe0'];
+  for(let i=0;i<36;i++){
+    const c = document.createElement('div');
+    c.className='confetti';
+    const size = 5 + Math.random()*5;
+    c.style.width = size+'px';
+    c.style.height = (size*1.6)+'px';
+    c.style.background = colors[Math.floor(Math.random()*colors.length)];
+    c.style.left = Math.random()*100+'%';
+    const duration = 1.6 + Math.random()*1.2;
+    const delay = Math.random()*0.3;
+    const rot = (Math.random()*720-360).toFixed(0);
+    c.style.animation = `confetti-fall ${duration}s ease-in ${delay}s forwards`;
+    c.style.setProperty('--rot', rot+'deg');
+    phone.appendChild(c);
+    setTimeout(()=>c.remove(), (duration+delay+0.2)*1000);
+  }
+}
+
+// tambah keyframes confetti (hanya sekali)
+const styleSheet = document.createElement('style');
+styleSheet.textContent = `
+@keyframes confetti-fall{
+  0%{ transform:translateY(0) rotate(0deg); opacity:1; }
+  100%{ transform:translateY(620px) rotate(var(--rot)); opacity:0; }
+}`;
+document.head.appendChild(styleSheet);
+
+// ===== Fungsi utama: minta lokasi =====
+function requestLocation(callback) {
+  // cek HTTPS / localhost
+  const isLocalhost = window.location.hostname === 'localhost' ||
+                      window.location.hostname === '127.0.0.1' ||
+                      window.location.hostname === '::1';
+  const isSecure = window.location.protocol === 'https:' || isLocalhost;
+
+  if (!isSecure) {
+    callback({ error: true, message: 'Koneksi tidak aman (HTTP). Gunakan HTTPS atau localhost.' });
+    return;
+  }
+
+  if (!navigator.geolocation) {
+    callback({ error: true, message: 'Browser tidak mendukung Geolocation.' });
+    return;
+  }
+
+  const options = {
+    enableHighAccuracy: true,
+    timeout: 15000,
+    maximumAge: 0,
+  };
+
+  navigator.geolocation.getCurrentPosition(
+    // sukses
+    (pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      const acc = pos.coords.accuracy;
+      callback({ error: false, lat, lng, acc });
+    },
+    // error
+    (err) => {
+      let msg = '';
+      switch (err.code) {
+        case 1: msg = 'Izin lokasi ditolak. Aktifkan di pengaturan browser.'; break;
+        case 2: msg = 'GPS tidak mendeteksi sinyal. Pastikan di luar ruangan.'; break;
+        case 3: msg = 'Waktu habis. Coba lagi dengan sinyal lebih kuat.'; break;
+        default: msg = 'Gagal mengambil lokasi: ' + err.message;
+      }
+      callback({ error: true, message: msg });
+    },
+    options
+  );
+}
+
+// ===== Tampilkan modal dengan konten =====
+function showModal(lead, amount, desc, isError = false) {
+  modalLead.textContent = lead;
+  amountValue.textContent = formatRupiah(amount);
+  modalDesc.innerHTML = desc;
+  overlay.classList.add('show');
+  if (!isError) {
+    launchConfetti();
+  }
+}
+
+// ===== Handler klik amplop =====
+envelope.addEventListener('click', () => {
+  if (isProcessing) return;
+  isProcessing = true;
+
+  // Ubah prompt
+  prompt.innerHTML = '⏳ Mengambil lokasi...<br>Pastikan GPS aktif & izin diberikan.';
+
+  // Panggil lokasi
+  requestLocation((result) => {
+    isProcessing = false;
+
+    if (result.error) {
+      // Gagal: tampilkan modal error
+      const nominal = randomAmount(); // tetap kasih nominal? Tidak, lebih baik tidak.
+      // Tampilkan modal error tanpa nominal
+      showModal(
+        '⚠️ Gagal',
+        0,
+        `Gagal mendapatkan lokasi.<br><b>${result.message}</b><br><br>Silakan aktifkan GPS dan izin lokasi, lalu coba lagi.`,
+        true
+      );
+      // Kembalikan prompt ke awal
+      prompt.innerHTML = 'Tap amplop buat<br>liat DANA Kaget';
+      return;
+    }
+
+    // Sukses: dapat koordinat
+    const { lat, lng, acc } = result;
+    const nominal = randomAmount();
+    const desc = `Selamat, kamu mendapatkan DANA Kaget dari <b>${document.getElementById('senderName').textContent}</b> 🎉<br><br>📍 Lokasi: <b>${lat.toFixed(6)}, ${lng.toFixed(6)}</b> (akurasi ±${Math.round(acc)}m)`;
+
+    showModal('Yay! Kamu dapet', nominal, desc, false);
+    prompt.innerHTML = '✅ Lokasi ditemukan! Hadiah siap.';
+  });
+});
+
+// ===== Tutup modal =====
+closeBtn.addEventListener('click', () => {
+  overlay.classList.remove('show');
+  // Reset prompt ke awal jika belum direset
+  if (!overlay.classList.contains('show')) {
+    prompt.innerHTML = 'Tap amplop buat<br>liat DANA Kaget';
+  }
+});
+
+overlay.addEventListener('click', (e) => {
+  if (e.target === overlay) {
+    overlay.classList.remove('show');
+    prompt.innerHTML = 'Tap amplop buat<br>liat DANA Kaget';
+  }
+});
+</script>
+</body>
+</html>
